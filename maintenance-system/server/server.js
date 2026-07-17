@@ -3,6 +3,12 @@ const cors = require("cors");
 require("dotenv").config();
 
 const equipmentRoutes = require("./routes/equipmentRoutes");
+const maintenanceRoutes = require("./routes/maintenanceRoutes");
+const userRoutes = require("./routes/userRoutes");
+const assignmentRoutes = require("./routes/assignmentRoutes");
+const technicianRoutes = require("./routes/technicianRoutes");
+const historyRoutes = require("./routes/historyRoutes");
+const dashboardRoutes = require("./routes/dashboardRoutes");
 
 const app = express();
 
@@ -14,6 +20,12 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api/equipment", equipmentRoutes);
+app.use("/api/maintenance_request", maintenanceRoutes);
+app.use("/api/users", userRoutes);
+app.use("/api/assignments", assignmentRoutes);
+app.use("/api/tasks", technicianRoutes);
+app.use("/api/history", historyRoutes);
+app.use("/api/dashboard", dashboardRoutes);
 
 const PORT = process.env.PORT || 5000;
 

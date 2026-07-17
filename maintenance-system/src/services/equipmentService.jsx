@@ -1,51 +1,21 @@
-import { supabase } from "../supabase/client";
+import axios from "axios";
 
+export const getEquipment = async () => {
+  const response = await axios.get("/api/equipment");
+  return response.data;
+};
 
-export async function getEquipment(){
+export const addEquipment = async (requestData) => {
+  const response = await axios.post(
+    "/api/equipment",
+    requestData
+  );
+};
 
-    const {data,error}=await supabase
-        .from("equipment")
-        .select("*")
-        .order("created_at",{ascending:false});
+export const deleteEquipment = async (requestData) => {
+  const response = await axios.delete(
+    "/api/equipment",
+    requestData
+  );
+};
 
-
-    if(error)
-        throw error;
-
-
-    return data;
-
-}
-
-
-
-export async function addEquipment(equipment){
-
-    const {data,error}=await supabase
-        .from("equipment")
-        .insert(equipment)
-        .select();
-
-
-    if(error)
-        throw error;
-
-
-    return data;
-
-}
-
-
-
-export async function deleteEquipment(id){
-
-    const {error}=await supabase
-        .from("equipment")
-        .delete()
-        .eq("id",id);
-
-
-    if(error)
-        throw error;
-
-}
