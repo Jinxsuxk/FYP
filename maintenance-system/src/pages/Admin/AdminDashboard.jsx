@@ -1,3 +1,4 @@
+import Layout from "../../components/Layout";
 import { useEffect, useState } from "react";
 
 import { getAdminStats } from "../../services/dashboardService";
@@ -42,111 +43,56 @@ function AdminDashboard() {
 
 
     return (
-
-        <div>
-
-            <h1>
-                Admin Dashboard
-            </h1>
-
-
+        <Layout>
             <div>
+                <h1>
+                    Admin Dashboard
+                </h1>
 
+                <div
+                    style={{
+                        display: "grid",
+                        gridTemplateColumns:
+                            "repeat(auto-fit,minmax(200px,1fr))",
+                        gap: "20px"
+                    }}
+                >
 
-                <h2>
-                    Equipment
-                </h2>
+                    <div className="card">
+                        Equipment
+                        <h2>{stats.totalEquipment}</h2>
+                    </div>
 
-                <p>
-                    {stats.totalEquipment}
-                </p>
+                    <div className="card">
+                        Users
+                        <h2>{stats.totalUsers}</h2>
+                    </div>
 
+                    <div className="card">
+                        Pending
+                        <h2>{stats.pending}</h2>
+                    </div>
 
+                    <div className="card">
+                        Assigned
+                        <h2>{stats.assigned}</h2>
+                    </div>
+
+                    <div className="card">
+                        In Progress
+                        <h2>{stats.inProgress}</h2>
+                    </div>
+
+                    <div className="card">
+                        Completed
+                        <h2>{stats.completed}</h2>
+                    </div>
+
+                </div>
+
+                
             </div>
-
-
-
-            <div>
-
-
-                <h2>
-                    Users
-                </h2>
-
-                <p>
-                    {stats.totalUsers}
-                </p>
-
-
-            </div>
-
-
-
-            <div>
-
-
-                <h2>
-                    Pending Requests
-                </h2>
-
-                <p>
-                    {stats.pending}
-                </p>
-
-
-            </div>
-
-
-
-            <div>
-
-
-                <h2>
-                    Assigned Requests
-                </h2>
-
-                <p>
-                    {stats.assigned}
-                </p>
-
-
-            </div>
-
-
-
-            <div>
-
-
-                <h2>
-                    In Progress
-                </h2>
-
-                <p>
-                    {stats.inProgress}
-                </p>
-
-
-            </div>
-
-
-
-            <div>
-
-
-                <h2>
-                    Completed Repairs
-                </h2>
-
-                <p>
-                    {stats.completed}
-                </p>
-
-
-            </div>
-
-
-
-        </div>
+        </Layout>
 
     );
 

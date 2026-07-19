@@ -1,3 +1,4 @@
+import Layout from "../../components/Layout";
 import {useEffect,useState} from "react";
 
 import {
@@ -31,7 +32,7 @@ setHistory(data);
 
 
 return(
-
+<Layout>
 <div>
 
 <h1>
@@ -105,7 +106,7 @@ item.repair_notes
 
 
 </div>
-
+</Layout>
 )
 
 }

@@ -9,6 +9,7 @@ const assignmentRoutes = require("./routes/assignmentRoutes");
 const technicianRoutes = require("./routes/technicianRoutes");
 const historyRoutes = require("./routes/historyRoutes");
 const dashboardRoutes = require("./routes/dashboardRoutes");
+const notificationRoutes = require("./routes/notificationRoutes");
 
 const app = express();
 
@@ -26,6 +27,7 @@ app.use("/api/assignments", assignmentRoutes);
 app.use("/api/tasks", technicianRoutes);
 app.use("/api/history", historyRoutes);
 app.use("/api/dashboard", dashboardRoutes);
+app.use("/api/notifications", notificationRoutes);
 
 const PORT = process.env.PORT || 5000;
 

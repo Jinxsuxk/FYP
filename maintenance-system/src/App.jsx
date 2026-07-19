@@ -1,10 +1,11 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import ProtectedRoute from "./components/ProtectedRoute";
 
-import Register from "./pages/Register";
 import Login from "./pages/Login";
 
 import AdminDashboard from "./pages/Admin/AdminDashboard";
+import UserManagement from "./pages/Admin/UserManagement";
+import CreateUser from "./pages/Admin/CreateUser";
 import LecturerDashboard from "./pages/Lecturer/LecturerDashboard";
 import ReportFault from "./pages/Lecturer/ReportFault";
 import StaffDashboard from "./pages/Staff/StaffDashboard";
@@ -13,13 +14,14 @@ import MaintenanceHistory from "./pages/Staff/MaintenanceHistory";
 import MaintenanceRequests from "./pages/Staff/MaintenanceRequests";
 import TechnicianDashboard from "./pages/Technician/TechnicianDashboard";
 import AssignedTasks from "./pages/Technician/AssignedTasks";
+import Notifications from "./pages/Notifications";
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/notifications" element={<Notifications />} />
 
         <Route
           path="/admin/dashboard"
@@ -28,6 +30,24 @@ function App() {
                 <AdminDashboard/>
             </ProtectedRoute>
           }
+        />
+
+        <Route
+            path="/admin/users"
+            element={
+              <ProtectedRoute allowedRole="Admin">
+                  <UserManagement/>
+              </ProtectedRoute>
+            }
+        />
+
+        <Route
+            path="/admin/users/create"
+            element={
+              <ProtectedRoute allowedRole="Admin">
+                  <CreateUser/>
+              </ProtectedRoute>
+            }
         />
 
         <Route
