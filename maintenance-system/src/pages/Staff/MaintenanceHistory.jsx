@@ -1,115 +1,378 @@
 import Layout from "../../components/Layout";
-import {useEffect,useState} from "react";
+
+import { useEffect, useState } from "react";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 import {
-getHistory
+  getHistory
 }
 from "../../services/historyService";
 
+function MaintenanceHistory() {
 
-function MaintenanceHistory(){
+  const [history, setHistory] =
+    useState([]);
 
+  const [search, setSearch] =
+    useState("");
 
-const [history,setHistory]=useState([]);
+  useEffect(() => {
 
+    loadHistory();
 
-useEffect(()=>{
+  }, []);
 
-loadHistory();
+  async function loadHistory() {
 
-},[]);
+    const data =
+      await getHistory();
 
+    setHistory(data);
 
+  }
 
-async function loadHistory(){
+  function exportHistoryPdf() {
 
-const data=await getHistory();
+    const doc = new jsPDF();
 
-setHistory(data);
+    doc.text(
+        "Maintenance History Report",
+        14,
+        15
+    );
 
+    autoTable(doc, {
+        head: [[
+            "Equipment",
+            "Issue",
+            "Notes"
+        ]],
+
+        body: history.map(item => [
+            item.maintenance_request
+                ?.equipment
+                ?.equipment_name || "",
+
+            item.maintenance_request
+                ?.issue_description || "",
+
+            item.repair_notes || ""
+        ])
+    });
+
+    doc.save(
+        "maintenance-history.pdf"
+    );
 }
 
+  const filteredHistory =
+    history.filter(
+      (item) =>
 
+        item
+          .maintenance_request
+          ?.equipment
+          ?.equipment_name
 
-return(
-<Layout>
-<div>
+          ?.toLowerCase()
 
-<h1>
-Maintenance History
-</h1>
+          .includes(
+            search.toLowerCase()
+          )
+    );
 
+  return (
 
-<table border="1">
+    <Layout>
 
-<thead>
+      <div
+        className="
+        flex
+        justify-between
+        items-center
+        mb-6
+        "
+      >
 
-<tr>
-<th>
-Equipment
-</th>
+        <h1
+          className="
+          text-3xl
+          font-bold
+          "
+        >
+          Maintenance History
+        </h1>
 
-<th>
-Issue
-</th>
+        <span
+          className="
+          bg-green-100
+          text-green-700
+          px-4
+          py-2
+          rounded-lg
+          font-medium
+          "
+        >
+          {history.length}
+          {" "}Completed Repairs
+        </span>
 
-<th>
-Notes
-</th>
+        <button
+            onClick={exportHistoryPdf}
+            className="
+            bg-red-600
+            hover:bg-red-700
+            text-white
+            px-4
+            py-2
+            rounded-lg
+            "
+            >
+            Export PDF
+        </button>
 
-</tr>
+      </div>
 
-</thead>
+      {/* Summary Card */}
 
+      <div
+        className="
+        bg-white
+        border
+        rounded-xl
+        shadow-sm
+        p-6
+        mb-6
+        "
+      >
 
-<tbody>
+        <p
+          className="
+          text-gray-500
+          "
+        >
+          Total Completed Maintenance
+        </p>
 
-{
-history.map(item=>(
+        <p
+          className="
+          text-3xl
+          font-bold
+          mt-2
+          "
+        >
+          {history.length}
+        </p>
 
-<tr key={item.id}>
+      </div>
 
+      {/* Search */}
 
-<td>
-{
-item.maintenance_request
-?.equipment
-?.equipment_name
+      <div
+        className="
+        bg-white
+        border
+        rounded-xl
+        shadow-sm
+        p-6
+        mb-6
+        "
+      >
+
+        <label
+          className="
+          block
+          mb-2
+          text-sm
+          font-medium
+          "
+        >
+          Search Equipment
+        </label>
+
+        <input
+
+          value={search}
+
+          onChange={(e) =>
+            setSearch(
+              e.target.value
+            )
+          }
+
+          placeholder="
+          Search equipment...
+          "
+
+          className="
+          w-full
+          border
+          rounded-lg
+          px-4
+          py-2
+          "
+        />
+
+      </div>
+
+      {/* History Table */}
+
+      <div
+        className="
+        bg-white
+        border
+        rounded-xl
+        shadow-sm
+        overflow-hidden
+        "
+      >
+
+        <table
+          className="
+          w-full
+          "
+        >
+
+          <thead
+            className="
+            bg-slate-50
+            "
+          >
+
+            <tr>
+
+              <th
+                className="
+                text-left
+                p-4
+                "
+              >
+                Equipment
+              </th>
+
+              <th
+                className="
+                text-left
+                p-4
+                "
+              >
+                Issue
+              </th>
+
+              <th
+                className="
+                text-left
+                p-4
+                "
+              >
+                Repair Notes
+              </th>
+
+              <th
+                className="
+                text-left
+                p-4
+                "
+              >
+                Completed Date
+              </th>
+
+            </tr>
+
+          </thead>
+
+          <tbody>
+
+            {
+              filteredHistory.map(
+                (item) => (
+
+                  <tr
+
+                    key={item.id}
+
+                    className="
+                    border-b
+                    hover:bg-slate-50
+                    transition
+                    "
+                  >
+
+                    <td
+                      className="
+                      p-4
+                      font-medium
+                      "
+                    >
+
+                      {
+                        item
+                          .maintenance_request
+                          ?.equipment
+                          ?.equipment_name
+                      }
+
+                    </td>
+
+                    <td
+                      className="
+                      p-4
+                      "
+                    >
+
+                      {
+                        item
+                          .maintenance_request
+                          ?.issue_description
+                      }
+
+                    </td>
+
+                    <td
+                      className="
+                      p-4
+                      max-w-md
+                      "
+                    >
+
+                      {
+                        item.repair_notes
+                      }
+
+                    </td>
+
+                    <td
+                      className="
+                      p-4
+                      "
+                    >
+
+                      {
+                        new Date(
+                          item.created_at
+                        )
+                        .toLocaleDateString()
+                      }
+
+                    </td>
+
+                  </tr>
+
+                )
+              )
+            }
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </Layout>
+
+  );
+
 }
-</td>
-
-
-<td>
-{
-item.maintenance_request
-?.issue_description
-}
-</td>
-
-
-<td>
-{
-item.repair_notes
-}
-</td>
-
-
-</tr>
-
-))
-
-}
-
-</tbody>
-
-</table>
-
-
-</div>
-</Layout>
-)
-
-}
-
 
 export default MaintenanceHistory;

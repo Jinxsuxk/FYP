@@ -1,7 +1,10 @@
 import Layout from "../../components/Layout";
+import StatCard from "../../components/StatCard";
+import StatusBadge from "../../components/StatusBadge";
 import { useEffect, useState } from "react";
 
 import { getAdminStats } from "../../services/dashboardService";
+import { getRequests } from "../../services/maintenanceService";
 
 
 function AdminDashboard() {
@@ -15,10 +18,13 @@ function AdminDashboard() {
         completed: 0
     });
 
+    const [request, setRequests] = useState([])
+
 
     useEffect(() => {
 
         loadStats();
+        loadRequests();
 
     }, []);
 
@@ -40,59 +46,177 @@ function AdminDashboard() {
 
     }
 
+    async function loadRequests() {
+
+    try {
+
+        const data = await getRequests();
+
+        setRequests(data);
+
+    } catch(error) {
+
+        console.error(error);
+
+    }
+
+}
+
 
 
     return (
         <Layout>
-            <div>
-                <h1>
-                    Admin Dashboard
-                </h1>
 
-                <div
-                    style={{
-                        display: "grid",
-                        gridTemplateColumns:
-                            "repeat(auto-fit,minmax(200px,1fr))",
-                        gap: "20px"
-                    }}
+            <div
+                className="
+                bg-white
+                rounded-xl
+                shadow-sm
+                border
+                p-6
+                "
+            >
+
+            <h1
+                className="
+                text-3xl
+                font-bold
+                mb-6
+                "
+            >
+                Admin Dashboard
+            </h1>
+
+
+            <div
+                className="
+                grid
+                grid-cols-1
+                md:grid-cols-2
+                xl:grid-cols-4
+                gap-6
+                mb-8
+                "
+            >
+
+                <StatCard
+                    title="Equipment"
+                    value={stats.totalEquipment}
+                />
+
+                <StatCard
+                    title="Users"
+                    value={stats.totalUsers}
+                />
+
+                <StatCard
+                    title="Pending Requests"
+                    value={stats.pending}
+                />
+
+                <StatCard
+                    title="Completed Requests"
+                    value={stats.completed}
+                />
+
+            </div>
+
+
+                <h2
+                    className="
+                    text-xl
+                    font-semibold
+                    mb-4
+                    "
+                >
+                    Recent Maintenance Requests
+                </h2>
+
+                <table
+                    className="
+                    w-full
+                    "
                 >
 
-                    <div className="card">
-                        Equipment
-                        <h2>{stats.totalEquipment}</h2>
-                    </div>
+                    <thead>
 
-                    <div className="card">
-                        Users
-                        <h2>{stats.totalUsers}</h2>
-                    </div>
+                        <tr
+                            className="
+                            border-b
+                            "
+                        >
 
-                    <div className="card">
-                        Pending
-                        <h2>{stats.pending}</h2>
-                    </div>
+                            <th className="text-left py-3">
+                                Equipment
+                            </th>
 
-                    <div className="card">
-                        Assigned
-                        <h2>{stats.assigned}</h2>
-                    </div>
+                            <th className="text-left py-3">
+                                Reporter
+                            </th>
 
-                    <div className="card">
-                        In Progress
-                        <h2>{stats.inProgress}</h2>
-                    </div>
+                            <th className="text-left py-3">
+                                Priority
+                            </th>
 
-                    <div className="card">
-                        Completed
-                        <h2>{stats.completed}</h2>
-                    </div>
+                            <th className="text-left py-3">
+                                Status
+                            </th>
 
-                </div>
+                        </tr>
 
-                
+                    </thead>
+
+                    <tbody>
+
+                        {request.map((request) => (
+
+                            <tr
+                                key={request.id}
+                                className="
+                                border-b
+                                "
+                            >
+
+                                <td className="py-3">
+                                    {
+                                        request.equipment
+                                            ?.equipment_name
+                                    }
+                                </td>
+
+                                <td className="py-3">
+                                    {
+                                        request.users
+                                            ?.full_name
+                                    }
+                                </td>
+
+                                <td className="py-3">
+                                    {request.priority}
+                                </td>
+
+                                <td className="py-3">
+
+                                    <StatusBadge
+                                        status={
+                                            request.status
+                                        }
+                                    />
+
+                                </td>
+
+                            </tr>
+
+                        ))}
+
+                    </tbody>
+
+                </table>
+
             </div>
+
         </Layout>
+        
 
     );
 

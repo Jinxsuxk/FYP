@@ -1,127 +1,73 @@
-import { Link } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
+import { FaSignOutAlt } from "react-icons/fa";
+import { useEffect, useState } from "react";
 
-import {
-    FaHome,
-    FaUsers,
-    FaTools,
-    FaHistory,
-    FaClipboardList
-}
-from "react-icons/fa";
+import { supabase } from "../supabase/client";
+import { sidebarMenu } from "./sidebarMenu";
 
 function Sidebar() {
+  const navigate = useNavigate();
 
-    return (
+  const [role, setRole] = useState("");
 
-        <div
-            style={{
-                width: "250px",
-                background: "#1f2937",
-                color: "white",
-                padding: "20px"
-            }}
-        >
+  useEffect(() => {
+    loadRole();
+  }, []);
 
-            <h2>
-                DEMMS
-            </h2>
+  async function loadRole() {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
-            <hr />
+    const { data } = await supabase
+      .from("users")
+      .select("role")
+      .eq("id", user.id)
+      .single();
 
-            <div
-                style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "15px"
-                }}
-            >
+    setRole(data.role);
+  }
 
-                <Link
-                    to="/admin/dashboard"
-                    style={{
-                        color: "white",
-                        textDecoration: "none"
-                    }}
-                >
-                    <FaHome />
-                    {" "}
-                    Dashboard
-                </Link>
+  async function handleLogout() {
+    await supabase.auth.signOut();
 
-                <Link
-                    to="/equipment"
-                    style={{
-                        color: "white",
-                        textDecoration: "none"
-                    }}
-                >
-                    <FaTools />
-                    {" "}
-                    Equipment
-                </Link>
+    localStorage.clear();
 
-                <Link
-                    to="/staff/maintenance"
-                    style={{
-                        color: "white",
-                        textDecoration: "none"
-                    }}
-                >
-                    <FaClipboardList />
-                    {" "}
-                    Requests
-                </Link>
+    navigate("/login");
+  }
 
-                <Link
-                    to="/history"
-                    style={{
-                        color: "white",
-                        textDecoration: "none"
-                    }}
-                >
-                    <FaHistory />
-                    {" "}
-                    History
-                </Link>
+  const links = sidebarMenu[role] || [];
 
-                <Link
-                    to="/admin/users"
-                    style={{
-                        color: "white",
-                        textDecoration: "none"
-                    }}
-                >
-                    <FaUsers />
-                    {" "}
-                    Users
-                </Link>
+  return (
+    <aside className="w-64 min-h-screen bg-slate-900 text-white p-5 flex flex-col">
+      <h1 className="text-2xl font-bold mb-8">DEMMS</h1>
 
-                <Link
-                    to="/admin/users/create"
-                    style={{
-                        color: "white",
-                        textDecoration: "none"
-                    }}
-                >
-                    Create User
-                </Link>
+      <nav className="space-y-2">
+        {links.map((link) => (
+          <NavLink
+            key={link.path}
+            to={link.path}
+            className={({ isActive }) =>
+              `flex items-center gap-3 px-4 py-3 rounded-lg transition ${
+                isActive ? "bg-blue-600" : "hover:bg-slate-800"
+              }`
+            }
+          >
+            {link.icon}
+            <span>{link.name}</span>
+          </NavLink>
+        ))}
+      </nav>
 
-                <Link
-                    to="/notifications"
-                    style={{
-                    color:"white",
-                    textDecoration:"none"
-                    }}
-                    >
-                    🔔 Notifications
-                </Link>
-
-            </div>
-
-        </div>
-
-    );
-
+      <button
+        onClick={handleLogout}
+        className="mt-auto flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 transition"
+      >
+        <FaSignOutAlt />
+        <span>Logout</span>
+      </button>
+    </aside>
+  );
 }
 
 export default Sidebar;

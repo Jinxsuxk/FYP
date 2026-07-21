@@ -124,3 +124,24 @@ exports.createUser = async (req,res)=>{
     });
 
 };
+
+exports.deleteUser = async (req, res) => {
+
+    const { id } = req.params;
+
+    const { error: authError } =
+        await supabase.auth.admin.deleteUser(id);
+
+    if (authError) {
+
+        return res.status(500).json({
+            error: authError.message
+        });
+
+    }
+
+    res.json({
+        message: "User deleted successfully"
+    });
+
+};

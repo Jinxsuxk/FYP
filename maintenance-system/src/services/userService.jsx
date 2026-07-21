@@ -49,3 +49,15 @@ export const createUser = async(userData)=>{
     return response.data;
 
 };
+
+export const deleteUser =
+async (id) => {
+
+    const response =
+        await axios.delete(
+            `/api/users/${id}`
+        );
+
+    return response.data;
+
+};

@@ -16,3 +16,31 @@ export const getRequests = async () => {
 
   return response.data;
 };
+
+export const getLecturerStats =
+async (userId) => {
+
+const response =
+await axios.get(
+
+`/api/maintenance_request/lecturer-stats/${userId}`
+
+);
+
+return response.data;
+
+};
+
+export const getMyRequests =
+async(userId)=>{
+
+const response =
+await axios.get(
+
+`/api/maintenance_request/my-requests/${userId}`
+
+);
+
+return response.data;
+
+};

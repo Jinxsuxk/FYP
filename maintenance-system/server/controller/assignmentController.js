@@ -1,4 +1,5 @@
 const supabase = require("../config/supabase");
+const createNotification = require("../utils/createNotification");
 
 exports.assignTechnician = async (req, res) => {
 
@@ -36,6 +37,11 @@ exports.assignTechnician = async (req, res) => {
             error: requestError.message
         });
     }
+
+    await createNotification(
+        technician_id,
+        "You have been assigned a new maintenance task."
+    );
 
     res.json({
         message: "Technician assigned successfully"

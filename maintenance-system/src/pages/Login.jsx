@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { supabase } from "../supabase/client";
 import { useNavigate } from "react-router-dom";
+import Input from "../components/Input";
+import Button from "../components/Button";
 
 function Login() {
 
@@ -35,41 +37,110 @@ function Login() {
         }
 
         if (userData.role === "Admin") {
-            navigate("/admin/dashboard");
+            navigate("/admin/dashboard",
+            {
+            replace:true
+            });
         }
 
         if (userData.role === "Staff") {
-            navigate("/staff/dashboard");
+            navigate("/staff/dashboard",
+            {
+            replace:true
+            });
         }
 
         if (userData.role === "Technician") {
-            navigate("/technician/dashboard");
+            navigate("/technician/dashboard",
+            {
+            replace:true
+            });
         }
 
         if (userData.role === "Lecturer") {
-            navigate("/lecturer/dashboard");
+            navigate("/lecturer/dashboard",
+            {
+            replace:true
+            });
+        }
+
+        if (userData.role === "Student") {
+            navigate("/student/dashboard",{
+                replace:true
+            });
         }
     }
 
     return (
-        <div>
-            <h1>Login</h1>
 
-            <input
-                placeholder="Email"
-                onChange={(e) => setEmail(e.target.value)}
+        <div
+        className="
+        min-h-screen
+        flex
+        items-center
+        justify-center
+        bg-slate-100
+        "
+        >
+
+        <div
+            className="
+            bg-white
+            shadow-xl
+            rounded-xl
+            p-8
+            w-full
+            max-w-md
+            "
+        >
+
+            <h1
+            className="
+            text-3xl
+            font-bold
+            text-center
+            mb-2
+            "
+            >
+            DEMMS
+            </h1>
+
+            <p
+            className="
+            text-center
+            text-gray-500
+            mb-6
+            "
+            >
+            Digital Equipment Maintenance
+            Management System
+            </p>
+
+            <Input
+            label="Email"
+            value={email}
+            onChange={(e) =>
+                setEmail(e.target.value)
+            }
             />
 
-            <input
-                type="password"
-                placeholder="Password"
-                onChange={(e) => setPassword(e.target.value)}
+            <Input
+            label="Password"
+            type="password"
+            value={password}
+            onChange={(e) =>
+                setPassword(e.target.value)
+            }
             />
 
-            <button onClick={login}>
-                Login
-            </button>
+            <Button onClick={login}>
+            Login
+            </Button>
+
         </div>
+
+        </div>
+
     );
 }
 

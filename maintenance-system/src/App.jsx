@@ -4,17 +4,24 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import Login from "./pages/Login";
 
 import AdminDashboard from "./pages/Admin/AdminDashboard";
+import AdminEquipment from "./pages/Admin/AdminEquipment";
+import AdminMaintenance from "./pages/Admin/AdminMaintenance";
+import AdminHistory from "./pages/Admin/History";
 import UserManagement from "./pages/Admin/UserManagement";
 import CreateUser from "./pages/Admin/CreateUser";
 import LecturerDashboard from "./pages/Lecturer/LecturerDashboard";
 import ReportFault from "./pages/Lecturer/ReportFault";
+import MyRequests from "./pages/Lecturer/MyRequests";
+import StudentDashboard from "./pages/Student/StudentDashboard";
 import StaffDashboard from "./pages/Staff/StaffDashboard";
 import Equipment from "./pages/Staff/Equipment";
 import MaintenanceHistory from "./pages/Staff/MaintenanceHistory";
 import MaintenanceRequests from "./pages/Staff/MaintenanceRequests";
 import TechnicianDashboard from "./pages/Technician/TechnicianDashboard";
 import AssignedTasks from "./pages/Technician/AssignedTasks";
+import TechnicianHistory from "./pages/Technician/History";
 import Notifications from "./pages/Notifications";
+import Profile from "./pages/Profile";
 
 function App() {
   return (
@@ -22,6 +29,7 @@ function App() {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/notifications" element={<Notifications />} />
+        <Route path="/profile" element={<Profile />}/>
 
         <Route
           path="/admin/dashboard"
@@ -30,6 +38,33 @@ function App() {
                 <AdminDashboard/>
             </ProtectedRoute>
           }
+        />
+
+        <Route
+            path="/admin/equipment"
+            element={
+            <ProtectedRoute allowedRole="Admin">
+                <AdminEquipment/>
+            </ProtectedRoute>
+            }
+        />
+
+        <Route
+            path="/admin/maintenance"
+            element={
+            <ProtectedRoute allowedRole="Admin">
+                <AdminMaintenance/>
+            </ProtectedRoute>
+            }
+        />
+
+        <Route
+            path="/admin/history"
+            element={
+              <ProtectedRoute allowedRole="Admin">
+                  <AdminHistory/>
+              </ProtectedRoute>
+            }
         />
 
         <Route
@@ -64,6 +99,42 @@ function App() {
           element={
             <ProtectedRoute allowedRole="Lecturer">
                 <ReportFault/>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/lecturer/requests"
+          element={
+            <ProtectedRoute allowedRole="Lecturer">
+                <MyRequests/>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/student/dashboard"
+          element={
+            <ProtectedRoute allowedRole="Student">
+                <StudentDashboard/>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/student/report-fault"
+          element={
+            <ProtectedRoute allowedRole="Student">
+                <ReportFault/>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/student/requests"
+          element={
+            <ProtectedRoute allowedRole="Student">
+                <MyRequests/>
             </ProtectedRoute>
           }
         />
@@ -122,9 +193,19 @@ function App() {
             </ProtectedRoute>
           }
         />
+
+        <Route
+          path="/technician/history"
+          element={
+            <ProtectedRoute allowedRole="Technician">
+                <TechnicianHistory/>
+            </ProtectedRoute>
+          }
+        />
       </Routes>
     </BrowserRouter>
   );
 }
+
 
 export default App;

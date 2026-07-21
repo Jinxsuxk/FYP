@@ -23,5 +23,17 @@ exports.getAssignedTasks = async (req, res) => {
     });
   }
 
-  res.json(data);
+  // remove completed tasks
+
+  const activeTasks =
+  data.filter(
+  (task)=>
+
+  task.maintenance_request.status
+  !==
+  "Completed"
+
+  );
+
+  res.json(activeTasks);
 };
