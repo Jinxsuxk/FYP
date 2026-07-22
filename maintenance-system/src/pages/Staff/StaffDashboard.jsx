@@ -3,9 +3,11 @@ import { Link } from "react-router-dom";
 
 import Layout from "../../components/Layout";
 
-import { FaTools, FaClipboardList, FaUserCog, FaHistory } from "react-icons/fa";
+import { FaTools, FaClipboardList, FaUserCog, FaHistory, FaClipboardCheck } from "react-icons/fa";
 
 import { getStaffStats } from "../../services/dashboardService";
+
+import StatCard from "../../components/StatCard";
 
 function StaffDashboard() {
   const [stats, setStats] = useState({
@@ -26,55 +28,54 @@ function StaffDashboard() {
 
   return (
     <Layout>
-      <h1 className="text-3xl font-bold mb-6">Staff Dashboard</h1>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
-        <div className="bg-white border rounded-xl p-6 shadow-sm">
-          <FaTools className="text-3xl mb-4" />
-          <p>Equipment</p>
-          <h2 className="text-3xl font-bold">{stats.equipmentCount}</h2>
-        </div>
-
-        <div className="bg-white border rounded-xl p-6 shadow-sm">
-          <FaClipboardList className="text-3xl mb-4" />
-          <p>Maintenance Requests</p>
-          <h2 className="text-3xl font-bold">{stats.openRequests}</h2>
-        </div>
-
-        <div className="bg-white border rounded-xl p-6 shadow-sm">
-          <FaUserCog className="text-3xl mb-4" />
-          <p>Assigned Tasks</p>
-          <h2 className="text-3xl font-bold">{stats.assignedTasks}</h2>
-        </div>
-
-        <div className="bg-white border rounded-xl p-6 shadow-sm">
-          <FaHistory className="text-3xl mb-4" />
-          <p>Completed Repairs</p>
-          <h2 className="text-3xl font-bold">{stats.completedRepairs}</h2>
-        </div>
-      </div>
-
-      <div className="mt-8 bg-white border rounded-xl p-6">
-        <h2 className="text-xl font-semibold">Maintenance Management</h2>
-        <p className="text-gray-500 mt-2">
-          Review reports and assign technicians.
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-900">Staff Dashboard</h1>
+        <p className="text-gray-500 mt-1">
+          Overview of equipment and maintenance activity across the facility.
         </p>
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm border p-6 mt-6">
-        <h2 className="text-xl font-semibold mb-4">Quick Actions</h2>
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+        <StatCard
+          icon={<FaTools size={20} />}
+          label="Equipment"
+          value={stats.equipmentCount}
+          tint="blue"
+        />
+        <StatCard
+          icon={<FaClipboardList size={20} />}
+          label="Maintenance Requests"
+          value={stats.openRequests}
+          tint="amber"
+        />
+        <StatCard
+          icon={<FaUserCog size={20} />}
+          label="Assigned Tasks"
+          value={stats.assignedTasks}
+          tint="violet"
+        />
+        <StatCard
+          icon={<FaHistory size={20} />}
+          label="Completed Repairs"
+          value={stats.completedRepairs}
+          tint="emerald"
+        />
+      </div>
+
+      <div className="bg-white border border-gray-100 rounded-2xl shadow-sm p-6 mt-6">
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>
 
         <div className="flex gap-4 flex-wrap">
           <Link
             to="/staff/maintenance"
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg"
+            className="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl font-medium transition-colors shadow-sm"
           >
             View Requests
           </Link>
 
           <Link
             to="/staff/equipment"
-            className="bg-green-600 text-white px-4 py-2 rounded-lg"
+            className="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl font-medium transition-colors shadow-sm"
           >
             Manage Equipment
           </Link>
