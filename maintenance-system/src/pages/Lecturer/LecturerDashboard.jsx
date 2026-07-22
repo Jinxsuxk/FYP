@@ -34,7 +34,7 @@ function LecturerDashboard() {
   return (
     <Layout>
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Lecturer Dashboard</h1>
+        <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
         <p className="text-gray-500 mt-1">
           Track your equipment reports and their repair progress.
         </p>

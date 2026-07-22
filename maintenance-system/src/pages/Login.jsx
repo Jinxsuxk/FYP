@@ -18,10 +18,24 @@ function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [formError, setFormError] = useState("");
 
   const navigate = useNavigate();
 
   async function login() {
+    if (!email.trim() || !password.trim()) {
+      setFormError("Please enter a valid username and password.");
+      return;
+    }
+
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!emailPattern.test(email.trim())) {
+      setFormError("Please enter a valid email address.");
+      return;
+    }
+
+    setFormError("");
     setLoading(true);
 
     try {
@@ -31,7 +45,7 @@ function Login() {
       });
 
       if (error) {
-        alert(error.message);
+        setFormError("Incorrect email or password. Please try again.");
         return;
       }
 
@@ -131,7 +145,10 @@ function Login() {
                 label="Email"
                 type="email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  setFormError("");
+                }}
                 placeholder="you@university.edu"
               />
 
@@ -139,10 +156,17 @@ function Login() {
                 label="Password"
                 type="password"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  setFormError("");
+                }}
                 placeholder="••••••••"
               />
             </div>
+
+            {formError && (
+              <p className="text-sm text-red-600 mt-3">{formError}</p>
+            )}
 
             <div className="mt-6">
               <Button onClick={login} disabled={loading} className="w-full">

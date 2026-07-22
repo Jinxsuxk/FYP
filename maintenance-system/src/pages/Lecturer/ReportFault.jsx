@@ -7,6 +7,9 @@ import Layout from "../../components/Layout";
 
 function ReportFault() {
   const [equipment, setEquipment] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [formError, setFormError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
 
   const [form, setForm] = useState({
     equipment_id: "",
@@ -24,25 +27,65 @@ function ReportFault() {
       setEquipment(data);
     } catch (error) {
       console.error(error);
+      setFormError("Failed to load equipment list. Please refresh the page.");
     }
+  }
+
+  function updateForm(changes) {
+    setForm({ ...form, ...changes });
+    setFormError("");
+    setSuccessMessage("");
   }
 
   async function handleSubmit(e) {
     e.preventDefault();
 
+    if (!form.equipment_id) {
+      setFormError("Please select the equipment you're reporting.");
+      return;
+    }
+
+    if (!form.issue_description.trim()) {
+      setFormError("Please describe the issue before submitting.");
+      return;
+    }
+
+    if (form.issue_description.trim().length < 10) {
+      setFormError(
+        "Please provide a bit more detail about the issue (at least 10 characters)."
+      );
+      return;
+    }
+
+    setFormError("");
+    setSuccessMessage("");
+    setLoading(true);
+
     try {
       const {
         data: { user },
+        error: userError,
       } = await supabase.auth.getUser();
 
-      await createRequest({
+      if (userError || !user) {
+        setFormError("Your session has expired. Please log in again.");
+        return;
+      }
+
+      const { error: requestError } = await createRequest({
         equipment_id: form.equipment_id,
         reported_by: user.id,
-        issue_description: form.issue_description,
+        issue_description: form.issue_description.trim(),
         priority: form.priority,
       });
 
-      alert("Maintenance request submitted");
+      if (requestError) {
+        console.error(requestError);
+        setFormError("Failed to submit request. Please try again.");
+        return;
+      }
+
+      setSuccessMessage("Maintenance request submitted successfully.");
 
       setForm({
         equipment_id: "",
@@ -51,7 +94,9 @@ function ReportFault() {
       });
     } catch (error) {
       console.error(error);
-      alert("Failed to submit request");
+      setFormError("Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -81,7 +126,7 @@ function ReportFault() {
               <select
                 value={form.equipment_id}
                 onChange={(e) =>
-                  setForm({ ...form, equipment_id: e.target.value })
+                  updateForm({ equipment_id: e.target.value })
                 }
                 className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500"
               >
@@ -110,9 +155,7 @@ function ReportFault() {
 
               <select
                 value={form.priority}
-                onChange={(e) =>
-                  setForm({ ...form, priority: e.target.value })
-                }
+                onChange={(e) => updateForm({ priority: e.target.value })}
                 className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500"
               >
                 <option value="Low">Low</option>
@@ -131,19 +174,28 @@ function ReportFault() {
                 rows="5"
                 value={form.issue_description}
                 onChange={(e) =>
-                  setForm({ ...form, issue_description: e.target.value })
+                  updateForm({ issue_description: e.target.value })
                 }
                 placeholder="Describe the problem in detail..."
                 className="w-full border border-gray-300 rounded-lg px-4 py-3 resize-none focus:outline-none focus:ring-2 focus:ring-indigo-500"
               />
             </div>
 
+            {formError && (
+              <p className="text-sm text-red-600">{formError}</p>
+            )}
+
+            {successMessage && (
+              <p className="text-sm text-emerald-600">{successMessage}</p>
+            )}
+
             <div className="flex justify-end">
               <button
                 type="submit"
-                className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-6 py-3 rounded-lg transition-colors shadow-sm"
+                disabled={loading}
+                className="bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-300 disabled:cursor-not-allowed text-white font-medium px-6 py-3 rounded-lg transition-colors shadow-sm"
               >
-                Submit Request
+                {loading ? "Submitting..." : "Submit Request"}
               </button>
             </div>
           </form>

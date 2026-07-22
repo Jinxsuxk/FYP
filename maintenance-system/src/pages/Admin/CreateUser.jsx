@@ -5,34 +5,60 @@ import Layout from "../../components/Layout";
 import { createUser } from "../../services/userService";
 
 function CreateUser() {
-
     const [fullName, setFullName] = useState("");
-
     const [email, setEmail] = useState("");
-
     const [password, setPassword] = useState("");
-
     const [role, setRole] = useState("Student");
-
     const [loading, setLoading] = useState(false);
+    const [formError, setFormError] = useState("");
+    const [successMessage, setSuccessMessage] = useState("");
 
+    function clearMessages() {
+        setFormError("");
+        setSuccessMessage("");
+    }
+
+    function validateForm() {
+        if (!fullName.trim()) {
+            return "Please enter the user's full name.";
+        }
+
+        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+        if (!email.trim() || !emailPattern.test(email.trim())) {
+            return "Please enter a valid email address.";
+        }
+
+        if (!password || password.length < 8) {
+            return "Password must be at least 8 characters long.";
+        }
+
+        return "";
+    }
 
     async function handleSubmit(e) {
-
         e.preventDefault();
 
-        try {
+        const validationError = validateForm();
 
+        if (validationError) {
+            setSuccessMessage("");
+            setFormError(validationError);
+            return;
+        }
+
+        try {
+            clearMessages();
             setLoading(true);
 
             await createUser({
-                full_name: fullName,
-                email,
+                full_name: fullName.trim(),
+                email: email.trim(),
                 password,
-                role
+                role,
             });
 
-            alert("User created successfully");
+            setSuccessMessage("User created successfully.");
 
             setFullName("");
             setEmail("");
@@ -40,22 +66,17 @@ function CreateUser() {
             setRole("Student");
 
         } catch (error) {
-
             console.error(error);
 
-            alert(
+            setFormError(
                 error?.response?.data?.error ||
-                "Failed to create user"
+                "Failed to create user. Please try again."
             );
 
         } finally {
-
             setLoading(false);
-
         }
-
     }
-
 
     return (
 
@@ -130,11 +151,10 @@ function CreateUser() {
                         <input
                             type="text"
                             value={fullName}
-                            onChange={(e) =>
-                                setFullName(
-                                    e.target.value
-                                )
-                            }
+                            onChange={(e) => {
+                                setFullName(e.target.value);
+                                clearMessages();
+                            }}
                             required
                             className="
                             w-full
@@ -169,11 +189,10 @@ function CreateUser() {
                         <input
                             type="email"
                             value={email}
-                            onChange={(e) =>
-                                setEmail(
-                                    e.target.value
-                                )
-                            }
+                            onChange={(e) => {
+                                setEmail(e.target.value);
+                                clearMessages();
+                            }}
                             required
                             className="
                             w-full
@@ -208,11 +227,10 @@ function CreateUser() {
                         <input
                             type="password"
                             value={password}
-                            onChange={(e) =>
-                                setPassword(
-                                    e.target.value
-                                )
-                            }
+                            onChange={(e) => {
+                                setPassword(e.target.value);
+                                clearMessages();
+                            }}
                             required
                             className="
                             w-full
@@ -225,6 +243,16 @@ function CreateUser() {
                             focus:ring-blue-500
                             "
                         />
+
+                        <p
+                            className="
+                            text-xs
+                            text-slate-400
+                            mt-1.5
+                            "
+                        >
+                            Must be at least 8 characters long.
+                        </p>
 
                     </div>
 
@@ -287,7 +315,17 @@ function CreateUser() {
 
                     </div>
 
+                    {formError && (
+                        <p className="text-sm text-red-600">
+                            {formError}
+                        </p>
+                    )}
 
+                    {successMessage && (
+                        <p className="text-sm text-green-600">
+                            {successMessage}
+                        </p>
+                    )}
 
                     <div
                         className="

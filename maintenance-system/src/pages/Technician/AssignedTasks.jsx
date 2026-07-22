@@ -21,6 +21,12 @@ function AssignedTasks() {
   const [statusFilter, setStatusFilter] = useState("All");
   const [priorityFilter, setPriorityFilter] = useState("All");
 
+  // Repair-notes modal state (replaces window.prompt)
+  const [completingTask, setCompletingTask] = useState(null);
+  const [repairNotes, setRepairNotes] = useState("");
+  const [notesError, setNotesError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
   useEffect(() => {
     loadTasks();
   }, []);
@@ -38,17 +44,46 @@ function AssignedTasks() {
   }
 
   async function handleUpdate(requestId, status) {
-    let notes = "";
+    await updateRequestStatus(requestId, status, "", technicianId);
+    loadTasks();
+  }
 
-    if (status === "Completed") {
-      notes = prompt("Enter repair notes:");
+  function openCompleteModal(requestId) {
+    setCompletingTask(requestId);
+    setRepairNotes("");
+    setNotesError("");
+  }
+
+  function closeCompleteModal() {
+    setCompletingTask(null);
+    setRepairNotes("");
+    setNotesError("");
+  }
+
+  async function handleConfirmComplete() {
+    if (!repairNotes.trim()) {
+      setNotesError("Please enter repair notes before completing this task.");
+      return;
     }
 
-    await updateRequestStatus(requestId, status, notes, technicianId);
+    try {
+      setSubmitting(true);
 
-    alert("Status updated");
+      await updateRequestStatus(
+        completingTask,
+        "Completed",
+        repairNotes.trim(),
+        technicianId
+      );
 
-    loadTasks();
+      closeCompleteModal();
+      loadTasks();
+    } catch (error) {
+      console.error(error);
+      setNotesError("Failed to update status. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   const assignedCount = tasks.filter(
@@ -62,26 +97,18 @@ function AssignedTasks() {
   const filteredTasks = tasks.filter((task) => {
     const request = task.maintenance_request;
 
-    const matchesSearch =
-        request?.equipment?.equipment_name
-        ?.toLowerCase()
-        .includes(search.toLowerCase());
+    const matchesSearch = request?.equipment?.equipment_name
+      ?.toLowerCase()
+      .includes(search.toLowerCase());
 
     const matchesStatus =
-        statusFilter === "All" ||
-        request?.status === statusFilter;
+      statusFilter === "All" || request?.status === statusFilter;
 
     const matchesPriority =
-        priorityFilter === "All" ||
-        request?.priority === priorityFilter;
+      priorityFilter === "All" || request?.priority === priorityFilter;
 
-    return (
-        matchesSearch &&
-        matchesStatus &&
-        matchesPriority
-    );
-
-    });
+    return matchesSearch && matchesStatus && matchesPriority;
+  });
 
   return (
     <Layout>
@@ -98,113 +125,56 @@ function AssignedTasks() {
         </span>
       </div>
 
+      {/* Statistics */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <StatCard
+          icon={<FaClipboardCheck size={20} />}
+          label="Assigned"
+          value={assignedCount}
+          tint="blue"
+        />
+        <StatCard
+          icon={<FaWrench size={20} />}
+          label="In Progress"
+          value={inProgressCount}
+          tint="amber"
+        />
+      </div>
+
       {/* Search and Filter */}
-        <div
-        className="
-        bg-white
-        border
-        rounded-2xl
-        shadow-sm
-        p-6
-        mb-6
-        "
-        >
-
-        <div
-            className="
-            grid
-            grid-cols-1
-            md:grid-cols-3
-            gap-4
-            "
-        >
-
-            <input
+      <div className="bg-white border rounded-2xl shadow-sm p-6 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search equipment..."
-            className="
-            border
-            rounded-lg
-            px-4
-            py-2
-            focus:outline-none
-            focus:ring-2
-            focus:ring-indigo-500
-            "
-            />
+            className="border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          />
 
-
-            <select
+          <select
             value={statusFilter}
-            onChange={(e) =>
-                setStatusFilter(e.target.value)
-            }
-            className="
-            border
-            rounded-lg
-            px-4
-            py-2
-            "
-            >
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="border rounded-lg px-4 py-2"
+          >
+            <option value="All">All Status</option>
+            <option value="Assigned">Assigned</option>
+            <option value="In Progress">In Progress</option>
+            <option value="Completed">Completed</option>
+          </select>
 
-            <option value="All">
-                All Status
-            </option>
-
-            <option value="Assigned">
-                Assigned
-            </option>
-
-            <option value="In Progress">
-                In Progress
-            </option>
-
-            <option value="Completed">
-                Completed
-            </option>
-
-            </select>
-
-
-            <select
+          <select
             value={priorityFilter}
-            onChange={(e) =>
-                setPriorityFilter(e.target.value)
-            }
-            className="
-            border
-            rounded-lg
-            px-4
-            py-2
-            "
-            >
-
-            <option value="All">
-                All Priority
-            </option>
-
-            <option value="Low">
-                Low
-            </option>
-
-            <option value="Medium">
-                Medium
-            </option>
-
-            <option value="High">
-                High
-            </option>
-
-            <option value="Critical">
-                Critical
-            </option>
-
-            </select>
-
+            onChange={(e) => setPriorityFilter(e.target.value)}
+            className="border rounded-lg px-4 py-2"
+          >
+            <option value="All">All Priority</option>
+            <option value="Low">Low</option>
+            <option value="Medium">Medium</option>
+            <option value="High">High</option>
+            <option value="Critical">Critical</option>
+          </select>
         </div>
-
-        </div>
+      </div>
 
       {/* Tasks Table */}
       <div className="bg-white border rounded-2xl shadow-sm overflow-hidden">
@@ -259,9 +229,7 @@ function AssignedTasks() {
 
                     {task.maintenance_request?.status === "In Progress" && (
                       <button
-                        onClick={() =>
-                          handleUpdate(task.request_id, "Completed")
-                        }
+                        onClick={() => openCompleteModal(task.request_id)}
                         className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
                       >
                         Complete
@@ -278,6 +246,57 @@ function AssignedTasks() {
           </table>
         )}
       </div>
+
+      {/* Repair Notes Modal */}
+      {completingTask && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6">
+            <h2 className="text-lg font-semibold text-gray-900 mb-1">
+              Complete Task
+            </h2>
+            <p className="text-sm text-gray-500 mb-4">
+              Add repair notes before marking this task as completed.
+            </p>
+
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Repair Notes
+            </label>
+
+            <textarea
+              rows="4"
+              value={repairNotes}
+              onChange={(e) => {
+                setRepairNotes(e.target.value);
+                setNotesError("");
+              }}
+              placeholder="Describe what was repaired or replaced..."
+              className="w-full border rounded-lg px-4 py-3 resize-none focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            />
+
+            {notesError && (
+              <p className="text-sm text-red-600 mt-2">{notesError}</p>
+            )}
+
+            <div className="flex justify-end gap-3 mt-6">
+              <button
+                onClick={closeCompleteModal}
+                disabled={submitting}
+                className="px-4 py-2 rounded-lg text-gray-600 hover:bg-gray-100 font-medium transition-colors disabled:opacity-50"
+              >
+                Cancel
+              </button>
+
+              <button
+                onClick={handleConfirmComplete}
+                disabled={submitting}
+                className="bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-300 disabled:cursor-not-allowed text-white px-5 py-2 rounded-lg font-medium transition-colors"
+              >
+                {submitting ? "Saving..." : "Mark Completed"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </Layout>
   );
 }
