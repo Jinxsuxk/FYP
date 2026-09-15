@@ -161,101 +161,53 @@ exports.updateRequestStatus = async (req, res) => {
 
 };
 
-exports.getLecturerStats =
-async (req, res) => {
+exports.getLecturerStats = async (req, res) => {
+  const { userId } = req.params;
 
-const { userId } = req.params;
+  const { data, error } = await supabase
+    .from("maintenance_request")
+    .select("status")
+    .eq("reported_by", userId);
 
-const { data, error } =
-await supabase
+  if (error) {
+    return res.status(500).json({ error: error.message });
+  }
 
-.from("maintenance_request")
+  const total = data.length;
 
-.select("status")
+  const pending = data.filter(
+    item => item.status !== "Completed"
+  ).length;
 
-.eq(
-"reported_by",
-userId
-);
+  const completed = data.filter(
+    item => item.status === "Completed"
+  ).length;
 
-if(error){
-
-return res.status(500).json({
-error:error.message
-});
-
-}
-
-const total =
-data.length;
-
-const pending =
-data.filter(
-item =>
-item.status !==
-"Completed"
-).length;
-
-const completed =
-data.filter(
-item =>
-item.status ===
-"Completed"
-).length;
-
-res.json({
-
-total,
-
-pending,
-
-completed
-
-});
-
+  res.json({
+    total,
+    pending,
+    completed
+  });
 };
 
-exports.getMyRequests =
-async (req,res)=>{
+exports.getMyRequests = async (req, res) => {
+  const { userId } = req.params;
 
-const { userId } =
-req.params;
+  const { data, error } = await supabase
+    .from("maintenance_request")
+    .select(`
+      *,
+      equipment(
+        equipment_name,
+        location
+      )
+    `)
+    .eq("reported_by", userId)
+    .order("created_at", { ascending: false });
 
-const { data, error } =
-await supabase
+  if (error) {
+    return res.status(500).json({ error: error.message });
+  }
 
-.from(
-"maintenance_request"
-)
-
-.select(`
-*,
-equipment(
-equipment_name,
-location
-)
-`)
-
-.eq(
-"reported_by",
-userId
-)
-
-.order(
-"created_at",
-{
-ascending:false
-}
-)
-
-if(error){
-
-return res.status(500).json({
-error:error.message
-});
-
-}
-
-res.json(data);
-
+  res.json(data);
 };

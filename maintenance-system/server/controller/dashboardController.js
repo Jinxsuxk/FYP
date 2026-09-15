@@ -80,170 +80,69 @@ exports.getAdminStats = async (req, res) => {
 };
 
 
-exports.getStaffStats =
-async (req, res) => {
+exports.getStaffStats = async (req, res) => {
+  try {
+    const { count: equipmentCount } = await supabase
+      .from("equipment")
+      .select("*", { count: "exact", head: true });
 
-try {
+    const { count: openRequests } = await supabase
+      .from("maintenance_request")
+      .select("*", { count: "exact", head: true })
+      .neq("status", "Completed");
 
-const {
-count: equipmentCount
-}
-=
-await supabase
-.from("equipment")
-.select("*", {
-count: "exact",
-head: true
-});
+    const { count: assignedTasks } = await supabase
+      .from("maintenance_request")
+      .select("*", { count: "exact", head: true })
+      .eq("status", "Assigned");
 
-const {
-count: openRequests
-}
-=
-await supabase
-.from("maintenance_request")
-.select("*", {
-count: "exact",
-head: true
-})
-.neq(
-"status",
-"Completed"
-);
+    const { count: completedRepairs } = await supabase
+      .from("maintenance_logs")
+      .select("*", { count: "exact", head: true });
 
-const {
-count: assignedTasks
-}
-=
-await supabase
-.from("maintenance_request")
-.select("*", {
-count: "exact",
-head: true
-})
-.eq(
-"status",
-"Assigned"
-);
-
-const {
-count: completedRepairs
-}
-=
-await supabase
-.from("maintenance_logs")
-.select("*", {
-count: "exact",
-head: true
-});
-
-res.json({
-
-equipmentCount,
-
-openRequests,
-
-assignedTasks,
-
-completedRepairs
-
-});
-
-}
-catch(error){
-
-res.status(500).json({
-error:error.message
-});
-
-}
-
+    res.json({
+      equipmentCount,
+      openRequests,
+      assignedTasks,
+      completedRepairs
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 };
 
-exports.getTechnicianStats =
-async (req, res) => {
+exports.getTechnicianStats = async (req, res) => {
+  try {
+    const { technicianId } = req.params;
 
-try {
+    const { data: assignedData } = await supabase
+      .from("maintenance_assignments")
+      .select(`
+        id,
+        maintenance_request(
+          status
+        )
+      `)
+      .eq("technician_id", technicianId);
 
-const {
-technicianId
-}
-=
-req.params;
+    const assignedTasks = assignedData.filter(
+      item => item.maintenance_request?.status === "Assigned"
+    ).length;
 
+    const inProgress = assignedData.filter(
+      item => item.maintenance_request?.status === "In Progress"
+    ).length;
 
+    const completedRepairs = assignedData.filter(
+      item => item.maintenance_request?.status === "Completed"
+    ).length;
 
-const {
-data: assignedData
-}
-=
-await supabase
-
-.from(
-"maintenance_assignments"
-)
-
-.select(`
-id,
-maintenance_request(
-status
-)
-`)
-
-.eq(
-"technician_id",
-technicianId
-);
-
-
-
-const assignedTasks =
-assignedData.filter(
-item =>
-item.maintenance_request?.status
-===
-"Assigned"
-).length;
-
-
-
-const inProgress =
-assignedData.filter(
-item =>
-item.maintenance_request?.status
-===
-"In Progress"
-).length;
-
-
-
-const completedRepairs =
-assignedData.filter(
-item =>
-item.maintenance_request?.status
-===
-"Completed"
-).length;
-
-
-
-res.json({
-
-assignedTasks,
-
-inProgress,
-
-completedRepairs
-
-});
-
-}
-catch(error){
-
-res.status(500).json({
-error:error.message
-});
-
-}
-
+    res.json({
+      assignedTasks,
+      inProgress,
+      completedRepairs
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 };

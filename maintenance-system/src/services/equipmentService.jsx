@@ -12,10 +12,12 @@ export const addEquipment = async (requestData) => {
   );
 };
 
-export const deleteEquipment = async (requestData) => {
-  const response = await axios.delete(
-    "/api/equipment",
-    requestData
-  );
+export const deleteEquipment = async (id) => {
+
+    const response = await axios.delete(
+        `/api/equipment/${id}`
+    );
+
+    return response.data;
 };
 
